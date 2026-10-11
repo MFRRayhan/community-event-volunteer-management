@@ -18,7 +18,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Organizer Dashboard | Community Connect",
-  description: "Manage your community events, publish drafts, and track volunteer capacity.",
+  description:
+    "Manage your community events, publish drafts, and track volunteer capacity.",
 };
 
 export default async function OrganizerDashboardPage() {
@@ -39,7 +40,9 @@ export default async function OrganizerDashboardPage() {
   const totalEvents = events.length;
   const publishedEvents = events.filter((e) => e.status === "published").length;
   const draftEvents = events.filter((e) => e.status === "draft").length;
-  const closedEvents = events.filter((e) => e.status === "closed" || e.status === "completed").length;
+  const closedEvents = events.filter(
+    (e) => e.status === "closed" || e.status === "completed",
+  ).length;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8">
@@ -83,7 +86,8 @@ export default async function OrganizerDashboardPage() {
                 Your Community Events
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Manage, publish, edit, or close registration for your initiatives.
+                Manage, publish, edit, or close registration for your
+                initiatives.
               </p>
             </div>
           </div>

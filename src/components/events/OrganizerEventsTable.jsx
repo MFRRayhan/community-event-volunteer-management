@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 import Badge from "@/components/ui/Badge";
 import {
   publishEventAction,
@@ -13,120 +14,137 @@ import { FiCheck, FiAlertTriangle, FiMapPin, FiUsers } from "react-icons/fi";
 
 export default function OrganizerEventsTable({ events = [] }) {
   const router = useRouter();
+
   const [actionLoadingId, setActionLoadingId] = useState(null);
-  const [feedbackMessage, setFeedbackMessage] = useState({ text: "", type: "" });
   const [filterStatus, setFilterStatus] = useState("all");
 
+  const confirmAction = async ({
+    title,
+    text,
+    confirmButtonText,
+    icon = "warning",
+    confirmButtonColor = "#059669",
+  }) => {
+    const result = await Swal.fire({
+      title,
+      text,
+      icon,
+      showCancelButton: true,
+      confirmButtonText,
+      cancelButtonText: "Cancel",
+      confirmButtonColor,
+      cancelButtonColor: "#64748b",
+      reverseButtons: true,
+      focusCancel: true,
+    });
+
+    return result.isConfirmed;
+  };
+
   const showFeedback = (text, type = "success") => {
-    setFeedbackMessage({ text, type });
-    setTimeout(() => {
-      setFeedbackMessage({ text: "", type: "" });
-    }, 4000);
+    return Swal.fire({
+      title: type === "success" ? "Success!" : "Something went wrong",
+      text,
+      icon: type,
+      confirmButtonText: "OK",
+      confirmButtonColor: type === "success" ? "#059669" : "#dc2626",
+    });
   };
 
-  const handlePublish = async (eventId) => {
-    if (!confirm("Are you sure you want to publish this event? Volunteers will immediately be able to register.")) {
-      return;
-    }
+  const handleAction = async (eventId, action, title = "") => {
+    const actionConfig = {
+      publish: {
+        title: "Publish Event?",
+        text: "Volunteers will immediately be able to register for this event.",
+        confirmButtonText: "Yes, publish it!",
+        confirmButtonColor: "#059669",
+        callback: publishEventAction,
+      },
+      close: {
+        title: "Close Registration?",
+        text: "No new volunteers will be allowed to register for this event.",
+        confirmButtonText: "Yes, close registration",
+        confirmButtonColor: "#d97706",
+        callback: closeRegistrationAction,
+      },
+      delete: {
+        title: "Delete Event?",
+        text: `Are you sure you want to delete "${title}"? This action cannot be undone.`,
+        confirmButtonText: "Yes, delete it!",
+        confirmButtonColor: "#dc2626",
+      },
+    };
+
+    const config = actionConfig[action];
+
+    if (!config) return;
+
+    const confirmed = await confirmAction(config);
+
+    if (!confirmed) return;
+
     setActionLoadingId(eventId);
+
     try {
-      const res = await publishEventAction(eventId);
-      if (res?.success) {
-        showFeedback(res.message, "success");
+      const result =
+        action === "delete"
+          ? await deleteEventAction(eventId)
+          : await config.callback(eventId);
+
+      if (result?.success) {
+        await showFeedback(
+          result.message || "Action completed successfully.",
+          "success",
+        );
+
         router.refresh();
       } else {
-        showFeedback(res?.message || "Failed to publish event.", "error");
+        await showFeedback(
+          result?.message || "The action could not be completed.",
+          "error",
+        );
       }
-    } catch (err) {
-      console.error(err);
-      showFeedback("Failed to publish event.", "error");
+    } catch (error) {
+      console.error(`Failed to ${action} event:`, error);
+
+      await showFeedback(
+        error?.message || "An unexpected error occurred. Please try again.",
+        "error",
+      );
     } finally {
       setActionLoadingId(null);
     }
   };
 
-  const handleCloseRegistration = async (eventId) => {
-    if (!confirm("Are you sure you want to close registration? No new volunteers will be allowed to sign up.")) {
-      return;
-    }
-    setActionLoadingId(eventId);
-    try {
-      const res = await closeRegistrationAction(eventId);
-      if (res?.success) {
-        showFeedback(res.message, "success");
-        router.refresh();
-      } else {
-        showFeedback(res?.message || "Failed to close registration.", "error");
-      }
-    } catch (err) {
-      console.error(err);
-      showFeedback("Failed to close registration.", "error");
-    } finally {
-      setActionLoadingId(null);
-    }
-  };
-
-  const handleDelete = async (eventId, title) => {
-    if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
-      return;
-    }
-    setActionLoadingId(eventId);
-    try {
-      const res = await deleteEventAction(eventId);
-      if (res?.success) {
-        showFeedback(res.message, "success");
-        router.refresh();
-      } else {
-        showFeedback(res?.message || "Failed to delete event.", "error");
-      }
-    } catch (err) {
-      console.error(err);
-      showFeedback("Failed to delete event.", "error");
-    } finally {
-      setActionLoadingId(null);
-    }
-  };
-
-  // Filter events by tab
-  const filteredEvents = events.filter((ev) => {
+  const filteredEvents = events.filter((event) => {
     if (filterStatus === "all") return true;
-    return ev.status === filterStatus;
+    return event.status === filterStatus;
   });
+
+  const buttonBase =
+    "px-2.5 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <div className="space-y-4">
-      {/* Toast Feedback Banner */}
-      {feedbackMessage.text && (
-        <div
-          className={`p-4 rounded-xl text-sm font-medium transition-all flex items-center ${
-            feedbackMessage.type === "success"
-              ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800"
-              : "bg-red-50 dark:bg-red-950/60 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
-          }`}
-        >
-          {feedbackMessage.type === "success" ? (
-            <FiCheck className="w-4 h-4 inline mr-2 shrink-0" />
-          ) : (
-            <FiAlertTriangle className="w-4 h-4 inline mr-2 shrink-0" />
-          )}
-          <span>{feedbackMessage.text}</span>
-        </div>
-      )}
-
       {/* Filter Tabs */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-2">
         <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl">
-          {["all", "published", "draft", "closed"].map((st) => (
+          {["all", "published", "draft", "closed"].map((status) => (
             <button
-              key={st}
-              onClick={() => setFilterStatus(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
-                filterStatus === st
+              key={status}
+              type="button"
+              onClick={() => setFilterStatus(status)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer ${
+                filterStatus === status
                   ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
-              {st} ({st === "all" ? events.length : events.filter((e) => e.status === st).length})
+              {status} (
+              {status === "all"
+                ? events.length
+                : events.filter((event) => event.status === status).length}
+              )
             </button>
           ))}
         </div>
@@ -136,7 +154,7 @@ export default function OrganizerEventsTable({ events = [] }) {
         </div>
       </div>
 
-      {/* Events Table / Card Container */}
+      {/* Events Table */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -146,7 +164,7 @@ export default function OrganizerEventsTable({ events = [] }) {
                   Event Title
                 </th>
                 <th scope="col" className="px-6 py-4">
-                  Date & Time
+                  Date &amp; Time
                 </th>
                 <th scope="col" className="px-6 py-4">
                   Category
@@ -162,17 +180,21 @@ export default function OrganizerEventsTable({ events = [] }) {
                 </th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
               {filteredEvents.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-6 py-10 text-center text-slate-500 dark:text-slate-400 text-sm">
-                    No events match the selected &quot;{filterStatus}&quot; filter.
+                  <td
+                    colSpan={6}
+                    className="px-6 py-10 text-center text-slate-500 dark:text-slate-400"
+                  >
+                    No events match the selected "{filterStatus}" filter.
                   </td>
                 </tr>
               ) : (
                 filteredEvents.map((event) => {
                   const eventDateStr = event.eventDate
-                    ? new Date(event.eventDate).toLocaleDateString("en-US", {
+                    ? new Date(event.eventDate).toLocaleString("en-US", {
                         month: "short",
                         day: "numeric",
                         year: "numeric",
@@ -221,65 +243,64 @@ export default function OrganizerEventsTable({ events = [] }) {
                         <span className="font-semibold text-slate-800 dark:text-slate-200">
                           {event.maxVolunteerCapacity}
                         </span>{" "}
-                        <span className="text-xs text-slate-400">volunteers</span>
+                        <span className="text-xs text-slate-400">
+                          volunteers
+                        </span>
                       </td>
 
                       {/* Actions */}
                       <td className="px-6 py-4 whitespace-nowrap text-right">
                         <div className="inline-flex items-center gap-2">
-                          {/* Publish (Only when Draft) */}
                           {event.status === "draft" && (
                             <button
                               type="button"
-                              onClick={() => handlePublish(event._id)}
-                              disabled={isBusy}
-                              className="px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 transition-colors disabled:opacity-50"
+                              onClick={() => handleAction(event._id, "publish")}
+                              disabled={actionLoadingId !== null}
+                              className={`${buttonBase} bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800`}
                               title="Publish this event"
                             >
-                              Publish
+                              {isBusy ? "Processing..." : "Publish"}
                             </button>
                           )}
 
-                          {/* Close Registration (Only when Published) */}
                           {event.status === "published" && (
                             <button
                               type="button"
-                              onClick={() => handleCloseRegistration(event._id)}
-                              disabled={isBusy}
-                              className="px-2.5 py-1 text-xs font-semibold rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300 dark:border-amber-800 transition-colors disabled:opacity-50"
+                              onClick={() => handleAction(event._id, "close")}
+                              disabled={actionLoadingId !== null}
+                              className={`${buttonBase} bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300 dark:border-amber-800`}
                               title="Close registration"
                             >
-                              Close
+                              {isBusy ? "Processing..." : "Close"}
                             </button>
                           )}
 
-                          {/* Volunteers */}
                           <Link
                             href={`/dashboard/organizer/events/${event._id}/registrations`}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800 transition-colors"
+                            className={`${buttonBase} inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800`}
                             title="Manage registered volunteers"
                           >
                             <FiUsers className="w-3.5 h-3.5" />
                             <span>Volunteers</span>
                           </Link>
 
-                          {/* Edit */}
                           <Link
                             href={`/dashboard/organizer/events/edit/${event._id}`}
-                            className="px-2.5 py-1 text-xs font-semibold rounded-md bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
+                            className={`${buttonBase} bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700`}
                           >
                             Edit
                           </Link>
 
-                          {/* Delete */}
                           <button
                             type="button"
-                            onClick={() => handleDelete(event._id, event.title)}
-                            disabled={isBusy}
-                            className="px-2.5 py-1 text-xs font-semibold rounded-md bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900 transition-colors disabled:opacity-50"
+                            onClick={() =>
+                              handleAction(event._id, "delete", event.title)
+                            }
+                            disabled={actionLoadingId !== null}
+                            className={`${buttonBase} bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-900`}
                             title="Delete event"
                           >
-                            Delete
+                            {isBusy ? "Processing..." : "Delete"}
                           </button>
                         </div>
                       </td>
