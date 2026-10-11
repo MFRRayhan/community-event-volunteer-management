@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   FiHeart,
   FiSearch,
@@ -6,106 +9,154 @@ import {
   FiCpu,
   FiArrowRight,
 } from "react-icons/fi";
+
 import Navbar from "@/components/layout/Navbar";
 
 export default function Home() {
+  const { data: session, status } = useSession();
+
+  const isLoggedIn = status === "authenticated";
+  const isOrganizer = session?.user?.role === "organizer";
+  const isVolunteer = session?.user?.role === "volunteer";
+
+  const dashboardHref = isOrganizer
+    ? "/dashboard/organizer"
+    : isVolunteer
+      ? "/dashboard/volunteer"
+      : "/events";
+
+  const dashboardLabel = isOrganizer
+    ? "Organizer Dashboard"
+    : isVolunteer
+      ? "Volunteer Dashboard"
+      : "Explore Dashboard";
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors">
+    <div className="flex min-h-screen flex-col bg-slate-50 transition-colors dark:bg-slate-950">
       <Navbar />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-16 sm:py-24 max-w-5xl mx-auto text-center space-y-12">
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col items-center justify-center space-y-12 px-4 py-16 text-center sm:py-24">
         {/* Hero Header */}
-        <div className="space-y-6 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs sm:text-sm font-semibold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-xs">
+        <div className="mx-auto max-w-3xl space-y-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-100 px-3.5 py-1.5 text-xs font-semibold text-emerald-800 shadow-xs dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 sm:text-sm">
             <FiHeart
-              className="w-4 h-4 text-emerald-600 dark:text-emerald-400"
+              className="h-4 w-4 text-emerald-600 dark:text-emerald-400"
               aria-hidden="true"
             />
             <span>Built for Purpose-Driven Communities</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+          <h1 className="text-4xl leading-tight font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-6xl">
             Empowering Communities Through{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">
+            <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-teal-300">
               Meaningful Volunteering
             </span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="mx-auto max-w-2xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
             Discover local social initiatives, secure volunteer shifts tailored
             to your skills, and empower organizers with AI tools and real-time
             attendance analytics.
           </p>
 
+          {/* Hero CTA Buttons */}
           <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
             <Link
               href="/events"
-              className="px-6 py-3.5 text-sm sm:text-base font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-2"
+              className="flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md sm:text-base"
             >
               <span>Explore Initiatives</span>
-              <FiArrowRight className="w-4 h-4" aria-hidden="true" />
+              <FiArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
-            <Link
-              href="/login"
-              className="px-6 py-3.5 text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl shadow-xs transition-colors"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/register"
-              className="px-6 py-3.5 text-sm sm:text-base font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 rounded-xl shadow-xs transition-colors"
-            >
-              Join Platform
-            </Link>
+
+            {status === "loading" ? (
+              <div
+                className="h-12 w-40 animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800"
+                aria-label="Loading authentication status"
+                role="status"
+              />
+            ) : isLoggedIn ? (
+              <Link
+                href={dashboardHref}
+                className="rounded-xl border border-emerald-300 bg-emerald-50 px-6 py-3.5 text-sm font-semibold text-emerald-700 shadow-xs transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50 sm:text-base"
+              >
+                {dashboardLabel}
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-semibold text-slate-700 shadow-xs transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700/50 sm:text-base"
+                >
+                  Sign In
+                </Link>
+
+                <Link
+                  href="/register"
+                  className="rounded-xl border border-emerald-300 bg-emerald-50 px-6 py-3.5 text-sm font-semibold text-emerald-700 shadow-xs transition-colors hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50 sm:text-base"
+                >
+                  Join Platform
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Feature Highlights Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left pt-6 w-full">
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
-            <div className="h-10 w-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center text-xl font-bold">
+        {/* Feature Highlights */}
+        <div className="grid w-full grid-cols-1 gap-6 pt-6 text-left md:grid-cols-3">
+          {/* Feature 1 */}
+          <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-950/60">
               <FiSearch
-                className="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
                 aria-hidden="true"
               />
             </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">
+
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Explore & Filter
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+
+            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 sm:text-sm">
               Find initiatives across Environment, Health, Education, and Crisis
               Relief with live capacity meters.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
-            <div className="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 flex items-center justify-center text-xl font-bold">
+          {/* Feature 2 */}
+          <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/60">
               <FiUsers
-                className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                className="h-5 w-5 text-blue-600 dark:text-blue-400"
                 aria-hidden="true"
               />
             </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">
+
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               Skill-Based Registration
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Volunteers register by selecting specific skills and track past &
-              upcoming commitments seamlessly.
+
+            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 sm:text-sm">
+              Volunteers register by selecting specific skills and track past
+              and upcoming commitments seamlessly.
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2.5">
-            <div className="h-10 w-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400 flex items-center justify-center text-xl font-bold">
+          {/* Feature 3 */}
+          <div className="space-y-2.5 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-950/60">
               <FiCpu
-                className="w-5 h-5 text-purple-600 dark:text-purple-400"
+                className="h-5 w-5 text-purple-600 dark:text-purple-400"
                 aria-hidden="true"
               />
             </div>
-            <h3 className="font-bold text-slate-900 dark:text-white text-base">
+
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">
               AI Event Assistant & Analytics
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Draft comprehensive event details with Gemini 1.5 Flash and track
+
+            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400 sm:text-sm">
+              Draft comprehensive event details with AI assistance and track
               volunteer turnout with Recharts.
             </p>
           </div>
@@ -113,7 +164,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+      <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
         <p>
           &copy; {new Date().getFullYear()} Community Connect. Built with
           Next.js, MongoDB & Tailwind CSS.
