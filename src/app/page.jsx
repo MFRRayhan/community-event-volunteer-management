@@ -164,11 +164,30 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-        <p>
-          &copy; {new Date().getFullYear()} Community Connect. Built with
-          Next.js, MongoDB & Tailwind CSS.
-        </p>
+      <footer className="border-t border-slate-200 bg-white px-4 py-6 dark:border-slate-800 dark:bg-slate-950">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            &copy; {new Date().getFullYear()} Community Connect. All rights
+            reserved.
+          </p>
+
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Designed & Developed by{" "}
+            <a
+              href="https://github.com/MFRRayhan"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-slate-800 transition-colors hover:text-green-600 dark:text-slate-200 dark:hover:text-green-400"
+            >
+              MFR Rayhan
+            </a>
+          </p>
+
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Next.js <span className="px-1">·</span> MongoDB{" "}
+            <span className="px-1">·</span> Tailwind CSS
+          </p>
+        </div>
       </footer>
     </div>
   );

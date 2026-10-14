@@ -15,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Community Event & Volunteer Management Platform",
-  description: "Connect passionate volunteers with community events and social initiatives.",
+  description:
+    "Connect passionate volunteers with community events and social initiatives.",
 };
 
 export default function RootLayout({ children }) {

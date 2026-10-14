@@ -3,14 +3,14 @@ import { getToken } from "next-auth/jwt";
 
 /**
  * Route Protection & Role Authorization Middleware
- * 
+ *
  * Rules:
  * - Unauthenticated users attempting to access /dashboard/* are redirected to /login
  * - Organizers cannot access /dashboard/volunteer/* (redirected to /dashboard/organizer)
  * - Volunteers cannot access /dashboard/organizer/* (redirected to /dashboard/volunteer)
  * - Direct visits to /dashboard route automatically to the user's role-specific space
  */
-export async function middleware(req) {
+export async function proxy(req) {
   const { pathname } = req.nextUrl;
 
   // Retrieve decoded JWT session token
@@ -31,17 +31,26 @@ export async function middleware(req) {
 
     // 2. Direct visit to /dashboard -> route to respective role dashboard
     if (pathname === "/dashboard" || pathname === "/dashboard/") {
-      const target = userRole === "organizer" ? "/dashboard/organizer" : "/dashboard/volunteer";
+      const target =
+        userRole === "organizer"
+          ? "/dashboard/organizer"
+          : "/dashboard/volunteer";
       return NextResponse.redirect(new URL(target, req.url));
     }
 
     // 3. Organizer cannot access volunteer dashboard
-    if (pathname.startsWith("/dashboard/volunteer") && userRole !== "volunteer") {
+    if (
+      pathname.startsWith("/dashboard/volunteer") &&
+      userRole !== "volunteer"
+    ) {
       return NextResponse.redirect(new URL("/dashboard/organizer", req.url));
     }
 
     // 4. Volunteer cannot access organizer dashboard
-    if (pathname.startsWith("/dashboard/organizer") && userRole !== "organizer") {
+    if (
+      pathname.startsWith("/dashboard/organizer") &&
+      userRole !== "organizer"
+    ) {
       return NextResponse.redirect(new URL("/dashboard/volunteer", req.url));
     }
   }

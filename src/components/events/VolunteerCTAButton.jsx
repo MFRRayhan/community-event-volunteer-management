@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import RegistrationModal from "@/components/registration/RegistrationModal";
 import { FiSlash, FiClock, FiHeart } from "react-icons/fi";
+import Swal from "sweetalert2";
 
 export default function VolunteerCTAButton({
   eventId,
@@ -27,7 +28,14 @@ export default function VolunteerCTAButton({
 
     // 2. If logged in as organizer, show friendly guidance
     if (session.user.role === "organizer") {
-      alert("You are signed in as an Organizer. To register for events, please log in with a Volunteer account.");
+      Swal.fire({
+        icon: "warning",
+        title: "Organizer Account",
+        text: "You are signed in as an Organizer. To register for events, please log in with a Volunteer account.",
+        confirmButtonText: "Got it",
+        confirmButtonColor: "#3085d6",
+      });
+
       return;
     }
 
