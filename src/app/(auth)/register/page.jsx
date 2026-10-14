@@ -62,7 +62,10 @@ export default function RegisterPage() {
         if (result?.errors) {
           setFieldErrors(result.errors);
         }
-        setGeneralError(result?.message || "Registration failed. Please check your information.");
+        setGeneralError(
+          result?.message ||
+            "Registration failed. Please check your information.",
+        );
         setIsLoading(false);
         return;
       }
@@ -87,13 +90,21 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-between mb-2">
-            <Link href="/" className="inline-flex items-center gap-1.5 text-xl font-bold text-emerald-600 dark:text-emerald-400">
-              <FiHeart className="w-5 h-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xl font-bold text-emerald-600 dark:text-emerald-400"
+            >
+              <FiHeart
+                className="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                aria-hidden="true"
+              />
               <span>Community Connect</span>
             </Link>
             <ThemeToggle />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Create an Account</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
+            Create an Account
+          </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Join as a Community Organizer or an eager Volunteer
           </p>
@@ -102,20 +113,29 @@ export default function RegisterPage() {
         {/* General Error Alert */}
         {generalError && (
           <div className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
-            <FiAlertCircle className="w-4 h-4 shrink-0 text-red-600" aria-hidden="true" />
+            <FiAlertCircle
+              className="w-4 h-4 shrink-0 text-red-600"
+              aria-hidden="true"
+            />
             <span>{generalError}</span>
           </div>
         )}
 
         {/* Google Sign In / Register */}
+
         <button
           type="button"
           disabled={isLoading || isGoogleLoading}
           onClick={handleGoogleSignIn}
-          className="w-full py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-750 font-semibold text-sm transition-colors shadow-xs flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60"
+          className="w-full py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 hover:text-slate-900 dark:hover:bg-slate-700 dark:hover:text-white font-semibold text-sm transition-colors shadow-xs flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <FcGoogle className="w-5 h-5" aria-hidden="true" />
-          <span>{isGoogleLoading ? "Connecting to Google..." : "Continue with Google (Volunteer)"}</span>
+
+          <span>
+            {isGoogleLoading
+              ? "Connecting to Google..."
+              : "Continue with Google (Volunteer)"}
+          </span>
         </button>
 
         {/* Divider */}
@@ -149,7 +169,10 @@ export default function RegisterPage() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <FiUsers className="w-5 h-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                  <FiUsers
+                    className="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                    aria-hidden="true"
+                  />
                   <span
                     className={`h-4 w-4 rounded-full border flex items-center justify-center ${
                       formData.role === "volunteer"
@@ -157,11 +180,17 @@ export default function RegisterPage() {
                         : "border-slate-300 dark:border-slate-600"
                     }`}
                   >
-                    {formData.role === "volunteer" && <span className="h-1.5 w-1.5 rounded-full bg-white"></span>}
+                    {formData.role === "volunteer" && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-white"></span>
+                    )}
                   </span>
                 </div>
-                <div className="font-semibold text-sm text-slate-900 dark:text-white">Volunteer</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Explore & join events</div>
+                <div className="font-semibold text-sm text-slate-900 dark:text-white">
+                  Volunteer
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Explore & join events
+                </div>
               </button>
 
               {/* Organizer Option */}
@@ -175,7 +204,10 @@ export default function RegisterPage() {
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <FiCalendar className="w-5 h-5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+                  <FiCalendar
+                    className="w-5 h-5 text-emerald-600 dark:text-emerald-400"
+                    aria-hidden="true"
+                  />
                   <span
                     className={`h-4 w-4 rounded-full border flex items-center justify-center ${
                       formData.role === "organizer"
@@ -183,15 +215,23 @@ export default function RegisterPage() {
                         : "border-slate-300 dark:border-slate-600"
                     }`}
                   >
-                    {formData.role === "organizer" && <span className="h-1.5 w-1.5 rounded-full bg-white"></span>}
+                    {formData.role === "organizer" && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-white"></span>
+                    )}
                   </span>
                 </div>
-                <div className="font-semibold text-sm text-slate-900 dark:text-white">Organizer</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Create & manage events</div>
+                <div className="font-semibold text-sm text-slate-900 dark:text-white">
+                  Organizer
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Create & manage events
+                </div>
               </button>
             </div>
             {fieldErrors.role && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors.role}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {fieldErrors.role}
+              </p>
             )}
           </div>
 
@@ -214,7 +254,9 @@ export default function RegisterPage() {
               }`}
             />
             {fieldErrors.name && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors.name}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {fieldErrors.name}
+              </p>
             )}
           </div>
 
@@ -237,7 +279,9 @@ export default function RegisterPage() {
               }`}
             />
             {fieldErrors.email && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors.email}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {fieldErrors.email}
+              </p>
             )}
           </div>
 
@@ -263,7 +307,9 @@ export default function RegisterPage() {
               Must be at least 6 characters with a letter and a number.
             </p>
             {fieldErrors.password && (
-              <p className="mt-1 text-xs text-red-600 dark:text-red-400">{fieldErrors.password}</p>
+              <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                {fieldErrors.password}
+              </p>
             )}
           </div>
 
@@ -275,9 +321,24 @@ export default function RegisterPage() {
           >
             {isLoading ? (
               <>
-                <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                <svg
+                  className="animate-spin h-4 w-4 text-white"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
                 </svg>
                 <span>Creating Account...</span>
               </>
@@ -290,7 +351,10 @@ export default function RegisterPage() {
         {/* Footer Link */}
         <p className="text-center text-sm text-slate-600 dark:text-slate-400 mt-6">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline">
+          <Link
+            href="/login"
+            className="font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+          >
             Sign in
           </Link>
         </p>
