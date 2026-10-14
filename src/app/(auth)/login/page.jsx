@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { FcGoogle } from "react-icons/fc";
 import {
   FiHeart,
@@ -18,8 +18,13 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const session = useSession();
 
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl =
+    searchParams.get("callbackUrl") ||
+    (session?.user?.role === "organizer"
+      ? "/dashboard/organizer"
+      : "/dashboard/volunteer");
   const justRegistered = searchParams.get("registered") === "true";
 
   const [formData, setFormData] = useState({
